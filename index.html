@@ -1,28 +1,44 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <title>我的主页</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+<script src="
+https://unpkg.com/mqtt/dist/mqtt.min.js">
+</script>
 
-<h1>你好，我是 KFC</h1>
 
-<p>嵌入式开发 | Linux | AI Agent</p>
+<button onclick="send('open')">
+打开空调
+</button>
 
-<h2>关于我</h2>
 
-<p>
-我是XX大学学生，目前主要学习：
-</p>
+<script>
 
-<ul>
-    <li>STM32</li>
-    <li>Linux</li>
-    <li>RK3566</li>
-    <li>AI Agent</li>
-</ul>
 
-</body>
-</html>
+const client =
+mqtt.connect(
+"wss://broker.emqx.io:8084/mqtt"
+);
+
+
+
+client.on(
+"connect",
+()=>{
+
+console.log(
+"mqtt connected"
+);
+
+});
+
+
+
+function send(cmd)
+{
+
+client.publish(
+"kfc/infrared/cmd",
+cmd
+);
+
+}
+
+
+</script>

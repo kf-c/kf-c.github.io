@@ -3,17 +3,11 @@ https://unpkg.com/mqtt/dist/mqtt.min.js">
 </script>
 
 
-<button onclick="send('open_26')">
-制冷---26°
-</button>
-
-<button onclick="send('open_24')">
-制冷---24°
-</button>
-
-<button onclick="send('close')">
-关闭空调
-</button>
+<div style="display:flex; flex-direction:column; gap:10px; max-width:200px;">
+  <button onclick="send('open_26')">制冷---26°</button>
+  <button onclick="send('open_24')">制冷---24°</button>
+  <button onclick="send('close')">关闭空调</button>
+</div>
 
 <script>
 

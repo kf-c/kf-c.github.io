@@ -1,55 +1,82 @@
-<script src="
-https://unpkg.com/mqtt/dist/mqtt.min.js">
-</script>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>空调控制面板</title>
 
+  <link rel="stylesheet" href="style.css">
+  
 
-<!-- <div style="display:flex; flex-direction:column; gap:10px; max-width:200px;">
-  <button onclick="send('open_26')">制冷---26°</button>
-  <button onclick="send('open_24')">制冷---24°</button>
-  <button onclick="send('close')">关闭空调</button>
-</div> -->
+  <!-- 引入 MQTT 库 -->
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+</head>
+<body>
 
-<!-- 确保在 HTML 的 <head> 标签中包含了这一行 -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <div class="control-panel">
+    <h3 class="panel-title">空调控制</h3>
+    
+    <button class="btn" onclick="send('open_26')">制冷---26°</button>
+    <button class="btn" onclick="send('open_24')">制冷---24°</button>
+    <button class="btn btn-danger" onclick="send('close')">关闭空调</button>
+    
+    <!-- 用于显示执行成功或超时的状态反馈 -->
+    <div id="status">就绪</div>
+  </div>
 
-<!-- 优化后的容器与按钮 -->
-<div style="display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 300px; margin: 0 auto; box-sizing: border-box;">
-  <button onclick="send('open_26')" style="padding: 14px 20px; font-size: 18px; width: 100%; border-radius: 8px; border: 1px solid #ccc; background-color: #f8f9fa; cursor: pointer;">制冷---26°</button>
-  <button onclick="send('open_24')" style="padding: 14px 20px; font-size: 18px; width: 100%; border-radius: 8px; border: 1px solid #ccc; background-color: #f8f9fa; cursor: pointer;">制冷---24°</button>
-  <button onclick="send('close')" style="padding: 14px 20px; font-size: 18px; width: 100%; border-radius: 8px; border: 1px solid #ccc; background-color: #ffe3e3; cursor: pointer;">关闭空调</button>
-</div>
+  <script>
+    const client = mqtt.connect("wss://broker.emqx.io:8084/mqtt");
+    
+    let timeoutId = null;
+    const statusEl = document.getElementById('status');
 
-<script>
+    client.on("connect", () => {
+      console.log("mqtt connected");
+      statusEl.textContent = "connected";
+      statusEl.style.color = "#67c23a";
 
+      // 订阅后端返回确认信息的 Topic（请根据实际后端下发的 Topic 修改）
+      client.subscribe("kfc/infrared/status", (err) => {
+        if (!err) {
+          console.log("Subscribed to status topic");
+        }
+      });
+    });
 
-const client =
-mqtt.connect(
-"wss://broker.emqx.io:8084/mqtt"
-);
+    // 监听 MQTT 消息，接收后端的 "done" 反馈
+    client.on("message", (topic, message) => {
+      const msgStr = message.toString();
+      console.log(`收到消息 [${topic}]: ${msgStr}`);
 
+      if (msgStr === "done") {
+        // 如果在超时前收到了 done，清除超时定时器
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+          timeoutId = null;
+        }
+        statusEl.textContent = "done";
+        statusEl.style.color = "#67c23a";
+      }
+    });
 
+    function send(cmd) {
+      // 1. 发送指令
+      client.publish("kfc/infrared/cmd", cmd);
+      
+      // 2. 更新界面状态为“发送中”
+      statusEl.textContent = "sending...";
+      statusEl.style.color = "#e6a23c";
 
-client.on(
-"connect",
-()=>{
+      // 3. 设置超时检测
+      if (timeoutId) clearTimeout(timeoutId);
+      
+      timeoutId = setTimeout(() => {
+        statusEl.textContent = "overtime";
+        statusEl.style.color = "#f56c6c";
+        timeoutId = null;
+      }, 5000); // 5000 ms
+    }
+  </script>
 
-console.log(
-"mqtt connected"
-);
-
-});
-
-
-
-function send(cmd)
-{
-
-client.publish(
-"kfc/infrared/cmd",
-cmd
-);
-
-}
-
-
-</script>
+</body>
+</html>

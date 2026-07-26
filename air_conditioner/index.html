@@ -3,10 +3,20 @@ https://unpkg.com/mqtt/dist/mqtt.min.js">
 </script>
 
 
-<div style="display:flex; flex-direction:column; gap:10px; max-width:200px;">
+<!-- <div style="display:flex; flex-direction:column; gap:10px; max-width:200px;">
   <button onclick="send('open_26')">制冷---26°</button>
   <button onclick="send('open_24')">制冷---24°</button>
   <button onclick="send('close')">关闭空调</button>
+</div> -->
+
+<!-- 确保在 HTML 的 <head> 标签中包含了这一行 -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- 优化后的容器与按钮 -->
+<div style="display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 300px; margin: 0 auto; box-sizing: border-box;">
+  <button onclick="send('open_26')" style="padding: 14px 20px; font-size: 18px; width: 100%; border-radius: 8px; border: 1px solid #ccc; background-color: #f8f9fa; cursor: pointer;">制冷---26°</button>
+  <button onclick="send('open_24')" style="padding: 14px 20px; font-size: 18px; width: 100%; border-radius: 8px; border: 1px solid #ccc; background-color: #f8f9fa; cursor: pointer;">制冷---24°</button>
+  <button onclick="send('close')" style="padding: 14px 20px; font-size: 18px; width: 100%; border-radius: 8px; border: 1px solid #ccc; background-color: #ffe3e3; cursor: pointer;">关闭空调</button>
 </div>
 
 <script>

@@ -1,45 +1,45 @@
-<script src="
-https://unpkg.com/mqtt/dist/mqtt.min.js">
-</script>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>KFC Home</title>
+    <link rel="stylesheet" href="style.css">
+</head>
 
+<body>
 
-<div style="display:flex; flex-direction:column; gap:10px; max-width:200px;">
-  <button onclick="send('open_26')">制冷---26°</button>
-  <button onclick="send('open_24')">制冷---24°</button>
-  <button onclick="send('close')">关闭空调</button>
+<h1>智能控制中心</h1>
+
+<div class="card" onclick="openAirConditioner()">
+    <h2>空调控制</h2>
+    <p>MQTT 红外控制</p>
 </div>
+
+
+<div class="card">
+    <h2>其他设备</h2>
+    <p>开发中...</p>
+</div>
+
 
 <script>
 
-
-const client =
-mqtt.connect(
-"wss://broker.emqx.io:8084/mqtt"
-);
-
-
-
-client.on(
-"connect",
-()=>{
-
-console.log(
-"mqtt connected"
-);
-
-});
-
-
-
-function send(cmd)
+function openAirConditioner()
 {
+    let password = prompt("请输入密码");
 
-client.publish(
-"kfc/infrared/cmd",
-cmd
-);
-
+    if(password === "413")
+    {
+        window.location.href="./air_conditioner/";
+    }
+    else
+    {
+        alert("密码错误");
+    }
 }
 
-
 </script>
+
+
+</body>
+</html>

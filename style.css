@@ -1,10 +1,29 @@
-body{
-    width:800px;
-    margin:auto;
-    font-family:Arial;
-    line-height:1.8;
+*{
+    box-sizing:border-box; /* 边框盒模型，设置的宽度是包含内边距和边框的总宽度 */
 }
 
+
+body{
+    /* max-width:350px; */
+    width: 80%;    /* 宽度为父容器(head里的device-width)的80%，表示大小 */
+    max-width: 500px;
+    margin:auto;   /* 元素外边距，水平居中，表示位置 */
+    /* padding:20px; */    /* 内边距（内容到边框的距离），上下20px，左右20px */
+    font-family:Arial; 
+}
+
+
+.card{
+    width:100%;
+    max-width: 400px;
+    margin:20px auto;/* 上下间距为5%(相对于父容器的宽度)，左右为水平居中*/
+
+    padding:20px;
+    border-radius: 12px;   /* 圆角 */
+    background: #ffffff;   /* 白色背景 */
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08); /* 轻微阴影 */
+}
 h1{
     color:#3b82f6;
 }
+

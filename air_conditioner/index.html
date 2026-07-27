@@ -1,45 +1,85 @@
-<script src="
-https://unpkg.com/mqtt/dist/mqtt.min.js">
-</script>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>空调控制面板</title>
 
+  <link rel="stylesheet" href="style.css">
+  
 
-<div style="display:flex; flex-direction:column; gap:10px; max-width:200px;">
-  <button onclick="send('open_26')">制冷---26°</button>
-  <button onclick="send('open_24')">制冷---24°</button>
-  <button onclick="send('close')">关闭空调</button>
-</div>
+  <!-- 引入 MQTT 库 -->
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+</head>
+<body>
 
-<script>
+  <div class="control-panel">
+    <h3 class="panel-title">空调控制</h3>
+    
+    <button class="btn" onclick="send('open_26')">制冷---26°</button>
+    <button class="btn" onclick="send('open_24')">制冷---24°</button>
+    <button class="btn btn-danger" onclick="send('close')">关闭空调</button>
+    
+    <!-- 用于显示执行成功或超时的状态反馈 -->
+    <div id="status">就绪</div>
+  </div>
 
+  <script>
+    const client = mqtt.connect("wss://broker.emqx.io:8084/mqtt");
+    
+    let timeoutId = null;
+    const statusEl = document.getElementById('status');
 
-const client =
-mqtt.connect(
-"wss://broker.emqx.io:8084/mqtt"
-);
+    client.on("connect", () => {
+      console.log("mqtt connected");
+      statusEl.textContent = "connected";
+      statusEl.style.color = "#67c23a";
 
+      // 订阅后端返回确认信息的 Topic
+      client.subscribe("kfc/infrared/cmd", (err) => {
+        if (!err) {
+          console.log("Subscribed to status topic");
+        }
+        else {
+          console.log("Subscribe failed");
+        }
+      });
+    });
 
+    // 监听 MQTT 消息，接收后端的 "done" 反馈
+    client.on("message", (topic, message) => {
+      const msgStr = message.toString();
+      console.log(`收到消息 [${topic}]: ${msgStr}`);
 
-client.on(
-"connect",
-()=>{
+      if (msgStr === "done") {
+        // 如果在超时前收到了 done，清除超时定时器
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+          timeoutId = null;
+        }
+        statusEl.textContent = "done";
+        statusEl.style.color = "#67c23a";
+      }
+    });
 
-console.log(
-"mqtt connected"
-);
+    function send(cmd) {
+      // 1. 发送指令
+      client.publish("kfc/infrared/cmd", cmd);
+      
+      // 2. 更新界面状态为“发送中”
+      statusEl.textContent = "sending...";
+      statusEl.style.color = "#e6a23c";
 
-});
+      // 3. 设置超时检测
+      if (timeoutId) clearTimeout(timeoutId);
+      
+      timeoutId = setTimeout(() => {
+        statusEl.textContent = "overtime";
+        statusEl.style.color = "#f56c6c";
+        timeoutId = null;
+      }, 6000); // 6000 ms
+    }
+  </script>
 
-
-
-function send(cmd)
-{
-
-client.publish(
-"kfc/infrared/cmd",
-cmd
-);
-
-}
-
-
-</script>
+</body>
+</html>

@@ -21,7 +21,7 @@
     <button class="btn btn-danger" onclick="send('close')">关闭空调</button>
     
     <!-- 用于显示执行成功或超时的状态反馈 -->
-    <div id="status">就绪</div>
+    <div id="status">ready</div>
   </div>
 
   <script>
@@ -63,22 +63,38 @@
     });
 
     function send(cmd) {
-      // 1. 发送指令
-      client.publish("kfc/infrared/cmd", cmd);
-      
-      // 2. 更新界面状态为“发送中”
-      statusEl.textContent = "sending...";
-      statusEl.style.color = "#e6a23c";
-
-      // 3. 设置超时检测
-      if (timeoutId) clearTimeout(timeoutId);
-      
-      timeoutId = setTimeout(() => {
-        statusEl.textContent = "overtime";
-        statusEl.style.color = "#f56c6c";
-        timeoutId = null;
-      }, 6000); // 6000 ms
+    // 记录当前发送次数
+    let count = 0;
+    
+    // 先更新界面状态
+    statusEl.textContent = "sending...";
+    statusEl.style.color = "#e6a23c";
+    
+    // 清除之前的超时定时器（如果有）
+    if (timeoutId) clearTimeout(timeoutId);
+    
+    // 定义发送函数
+    function doSend() {
+        count++;
+        
+        client.publish("kfc/infrared/cmd", cmd);
+        console.log(`发送第 ${count} 次: ${cmd}`);
+        
+        if (count < 3) {
+            setTimeout(doSend, 1000); // 每次间隔 0.5 秒发
+        } else {
+            // 3次全部发完，启动超时检测
+            timeoutId = setTimeout(() => {
+                statusEl.textContent = "overtime";
+                statusEl.style.color = "#f56c6c";
+                timeoutId = null;
+            }, 5000);
+        }
     }
+    
+    // 开始第一次发送
+    doSend();
+}
   </script>
 
 </body>
